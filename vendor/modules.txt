@@ -1,0 +1,5 @@
+# github.com/tobiashort/utils-go v0.0.0-20260101124110-58662b175096
+## explicit; go 1.24.3
+github.com/tobiashort/utils-go/must
+github.com/tobiashort/utils-go/option
+github.com/tobiashort/utils-go/strings
