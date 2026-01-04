@@ -338,12 +338,14 @@ func (l *Lexer) NextToken() token.Token {
 	}
 
 	if tok.None {
-		return token.Token{
+		tok = option.Some(token.Token{
 			Type:    token.ILLEGAL,
 			Literal: string(l.rune()),
 			Line:    l.line,
 			Column:  l.column,
-		}
+		})
+		l.position++
+		l.column++
 	}
 
 	return tok.Val
