@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
@@ -10,14 +11,16 @@ import (
 )
 
 type Lexer struct {
+	filename string
 	input    string
 	position int
 	line     int
 	column   int
 }
 
-func New(input string) *Lexer {
+func New(filename string, input string) *Lexer {
 	return &Lexer{
+		filename: filename,
 		input:    input,
 		position: 0,
 		line:     1,
@@ -25,37 +28,34 @@ func New(input string) *Lexer {
 	}
 }
 
-func (l *Lexer) rune() rune {
-	if l.position >= len(l.input) {
-		return 0
+func (l *Lexer) Analyze() ([]token.Token, error) {
+	var tokens []token.Token
+	for {
+		t := l.nextToken()
+		tokens = append(tokens, t)
+		if t.Type == token.EOF {
+			return tokens, nil
+		}
+		if t.Type == token.ILLEGAL {
+			return tokens, fmt.Errorf("%s:%d:%d illegal token %q", l.filename, l.line, l.column, t.Literal)
+		}
 	}
-	return []rune(l.input)[l.position]
 }
 
-func (l *Lexer) field() string {
-	fields := strings.FieldsFunc(l.input[l.position:], func(r rune) bool {
-		return unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r)
-	})
-	if len(fields) > 0 {
-		return fields[0]
-	}
-	return ""
-}
-
-func (l *Lexer) NextToken() token.Token {
+func (l *Lexer) nextToken() token.Token {
 	var tok = option.None[token.Token]()
 
 	if r := l.rune(); r == '\n' {
 		l.position++
 		l.line++
 		l.column = 1
-		return l.NextToken()
+		return l.nextToken()
 	}
 
 	if r := l.rune(); unicode.IsSpace(r) {
 		l.position++
 		l.column++
-		return l.NextToken()
+		return l.nextToken()
 	}
 
 	switch r := l.rune(); r {
@@ -349,4 +349,21 @@ func (l *Lexer) NextToken() token.Token {
 	}
 
 	return tok.Val
+}
+
+func (l *Lexer) rune() rune {
+	if l.position >= len(l.input) {
+		return 0
+	}
+	return []rune(l.input)[l.position]
+}
+
+func (l *Lexer) field() string {
+	fields := strings.FieldsFunc(l.input[l.position:], func(r rune) bool {
+		return unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r)
+	})
+	if len(fields) > 0 {
+		return fields[0]
+	}
+	return ""
 }

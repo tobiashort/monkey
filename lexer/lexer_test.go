@@ -25,10 +25,14 @@ func TestNextToken(t *testing.T) {
 		{Type: token.EOF, Literal: "", Line: 1, Column: 9},
 	}
 
-	l := lexer.New(input)
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
 
-	for _, expectedToken := range expectedTokens {
-		actualToken := l.NextToken()
+	for i, expectedToken := range expectedTokens {
+		actualToken := tokens[i]
 		if !reflect.DeepEqual(expectedToken, actualToken) {
 			t.Fatalf(
 				strings.Dedent(`
@@ -89,10 +93,14 @@ func TestNextToken2(t *testing.T) {
 		{Type: token.EOF, Literal: "", Line: 7, Column: 1},
 	}
 
-	l := lexer.New(input)
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
 
-	for _, expectedToken := range expectedTokens {
-		actualToken := l.NextToken()
+	for i, expectedToken := range expectedTokens {
+		actualToken := tokens[i]
 		if !reflect.DeepEqual(expectedToken, actualToken) {
 			t.Fatalf(
 				strings.Dedent(`
@@ -120,10 +128,14 @@ func TestNextToken3(t *testing.T) {
 		{Type: token.GEQT, Literal: ">=", Line: 1, Column: 13},
 	}
 
-	l := lexer.New(input)
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
 
-	for _, expectedToken := range expectedTokens {
-		actualToken := l.NextToken()
+	for i, expectedToken := range expectedTokens {
+		actualToken := tokens[i]
 		if !reflect.DeepEqual(expectedToken, actualToken) {
 			t.Fatalf(
 				strings.Dedent(`
@@ -166,10 +178,14 @@ func TestNextToken4(t *testing.T) {
 		{Type: token.EOF, Literal: "", Line: 6, Column: 1},
 	}
 
-	l := lexer.New(input)
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
 
-	for _, expectedToken := range expectedTokens {
-		actualToken := l.NextToken()
+	for i, expectedToken := range expectedTokens {
+		actualToken := tokens[i]
 		if !reflect.DeepEqual(expectedToken, actualToken) {
 			t.Fatalf(
 				strings.Dedent(`
