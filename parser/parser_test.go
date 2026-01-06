@@ -7,6 +7,7 @@ import (
 	"github.com/tobiashort/utils-go/strings"
 
 	"github.com/tobiashort/monkey/ast"
+	"github.com/tobiashort/monkey/lexer"
 	"github.com/tobiashort/monkey/parser"
 	"github.com/tobiashort/monkey/token"
 )
@@ -27,7 +28,13 @@ func TestParse(t *testing.T) {
 		},
 	}
 
-	p := parser.New("stdin", input)
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := parser.New(tokens)
 	actualAst, err := p.Parse()
 	if err != nil {
 		t.Fatal(err)
@@ -78,7 +85,13 @@ func TestParse2(t *testing.T) {
 		},
 	}
 
-	p := parser.New("stdin", input)
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := parser.New(tokens)
 	actualAst, err := p.Parse()
 	if err != nil {
 		t.Fatal(err)
@@ -145,7 +158,13 @@ func TestParse3(t *testing.T) {
 		},
 	}
 
-	p := parser.New("stdin", input)
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := parser.New(tokens)
 	actualAst, err := p.Parse()
 	if err != nil {
 		t.Fatal(err)
@@ -212,7 +231,13 @@ func TestParse4(t *testing.T) {
 		},
 	}
 
-	p := parser.New("stdin", input)
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := parser.New(tokens)
 	actualAst, err := p.Parse()
 	if err != nil {
 		t.Fatal(err)

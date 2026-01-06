@@ -2,7 +2,6 @@ package token
 
 import (
 	"fmt"
-	"runtime"
 )
 
 type TokenType = string
@@ -10,6 +9,7 @@ type TokenType = string
 type Token struct {
 	Type    TokenType
 	Literal string
+	File    string
 	Line    int
 	Column  int
 }
@@ -69,7 +69,6 @@ func BindingPower(t Token) (int, error) {
 	case BANG:
 		return 5, nil
 	default:
-		_, file, line, _ := runtime.Caller(0)
-		return -1, fmt.Errorf("%s:%d: illegal token type %q", file, line, t.Type)
+		return -1, fmt.Errorf("%s:%d:%d: illegal token type %q", t.File, t.Line, t.Column, t.Type)
 	}
 }

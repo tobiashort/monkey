@@ -11,16 +11,16 @@ import (
 )
 
 type Lexer struct {
-	filename string
+	file     string
 	input    string
 	position int
 	line     int
 	column   int
 }
 
-func New(filename string, input string) *Lexer {
+func New(file string, input string) *Lexer {
 	return &Lexer{
-		filename: filename,
+		file:     file,
 		input:    input,
 		position: 0,
 		line:     1,
@@ -37,7 +37,7 @@ func (l *Lexer) Analyze() ([]token.Token, error) {
 			return tokens, nil
 		}
 		if t.Type == token.ILLEGAL {
-			return tokens, fmt.Errorf("%s:%d:%d illegal token %q", l.filename, l.line, l.column, t.Literal)
+			return tokens, fmt.Errorf("%s:%d:%d illegal token %q", t.File, t.Line, t.Column, t.Literal)
 		}
 	}
 }
@@ -63,6 +63,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.BANG,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -72,6 +73,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.NOT_EQUAL,
 				Literal: string(r) + string(nr),
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column - 1,
 			})
@@ -82,6 +84,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.ASSIGN,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -91,6 +94,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.EQUAL,
 				Literal: string(r) + string(nr),
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column - 1,
 			})
@@ -101,6 +105,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.PLUS,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -110,6 +115,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.MINUS,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -119,6 +125,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.SLASH,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -128,6 +135,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.ASTERISK,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -137,6 +145,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.LT,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -146,6 +155,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.LEQT,
 				Literal: string(r) + string(nr),
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column - 1,
 			})
@@ -156,6 +166,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.GT,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -165,6 +176,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.GEQT,
 				Literal: string(r) + string(nr),
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column - 1,
 			})
@@ -175,6 +187,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.COMMA,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -184,6 +197,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.SEMICOLON,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -193,6 +207,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.LPAREN,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -202,6 +217,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.RPAREN,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -211,6 +227,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.LBRACE,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -220,6 +237,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.RBRACE,
 			Literal: string(r),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -229,6 +247,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.EOF,
 			Literal: "",
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
@@ -246,6 +265,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.LET,
 				Literal: f,
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column,
 			})
@@ -255,6 +275,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.FUNCTION,
 				Literal: f,
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column,
 			})
@@ -264,6 +285,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.IF,
 				Literal: f,
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column,
 			})
@@ -273,6 +295,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.ELSE,
 				Literal: f,
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column,
 			})
@@ -282,6 +305,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.FALSE,
 				Literal: f,
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column,
 			})
@@ -291,6 +315,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.TRUE,
 				Literal: f,
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column,
 			})
@@ -300,6 +325,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.RETURN,
 				Literal: f,
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column,
 			})
@@ -310,6 +336,7 @@ func (l *Lexer) nextToken() token.Token {
 				tok = option.Some(token.Token{
 					Type:    token.IDENT,
 					Literal: f,
+					File:    l.file,
 					Line:    l.line,
 					Column:  l.column,
 				})
@@ -329,6 +356,7 @@ func (l *Lexer) nextToken() token.Token {
 			tok = option.Some(token.Token{
 				Type:    token.INT,
 				Literal: f,
+				File:    l.file,
 				Line:    l.line,
 				Column:  l.column,
 			})
@@ -341,6 +369,7 @@ func (l *Lexer) nextToken() token.Token {
 		tok = option.Some(token.Token{
 			Type:    token.ILLEGAL,
 			Literal: string(l.rune()),
+			File:    l.file,
 			Line:    l.line,
 			Column:  l.column,
 		})
