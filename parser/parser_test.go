@@ -20,7 +20,9 @@ func TestParse(t *testing.T) {
 
 	expectedAst := ast.Ast{
 		ast.ExpressionStatement{
+			Type: ast.EXPR,
 			Expression: ast.IdentifierExpression{
+				Type: ast.IDENT,
 				Identifier: token.Token{
 					Type:    token.IDENT,
 					Literal: "foobar",
@@ -30,7 +32,9 @@ func TestParse(t *testing.T) {
 			},
 		},
 		ast.ExpressionStatement{
+			Type: ast.EXPR,
 			Expression: ast.LiteralExpression{
+				Type: ast.LITERAL,
 				Literal: token.Token{
 					Type:    token.STRING,
 					Literal: "\"foobar\"",
@@ -40,7 +44,9 @@ func TestParse(t *testing.T) {
 			},
 		},
 		ast.ExpressionStatement{
+			Type: ast.EXPR,
 			Expression: ast.LiteralExpression{
+				Type: ast.LITERAL,
 				Literal: token.Token{
 					Type:    token.INT,
 					Literal: "42",
@@ -50,7 +56,9 @@ func TestParse(t *testing.T) {
 			},
 		},
 		ast.ExpressionStatement{
+			Type: ast.EXPR,
 			Expression: ast.LiteralExpression{
+				Type: ast.LITERAL,
 				Literal: token.Token{
 					Type:    token.FLOAT,
 					Literal: "42.0",
@@ -91,8 +99,11 @@ func TestParse2(t *testing.T) {
 
 	expectedAst := ast.Ast{
 		ast.ExpressionStatement{
+			Type: ast.EXPR,
 			Expression: ast.BinaryExpression{
+				Type: ast.BINARY,
 				Left: ast.LiteralExpression{
+					Type: ast.LITERAL,
 					Literal: token.Token{
 						Type:    token.INT,
 						Literal: "1",
@@ -107,6 +118,7 @@ func TestParse2(t *testing.T) {
 					Column:  3,
 				},
 				Right: ast.LiteralExpression{
+					Type: ast.LITERAL,
 					Literal: token.Token{
 						Type:    token.INT,
 						Literal: "2",
@@ -148,8 +160,11 @@ func TestParse3(t *testing.T) {
 
 	expectedAst := ast.Ast{
 		ast.ExpressionStatement{
+			Type: ast.EXPR,
 			Expression: ast.BinaryExpression{
+				Type: ast.BINARY,
 				Left: ast.LiteralExpression{
+					Type: ast.LITERAL,
 					Literal: token.Token{
 						Type:    token.INT,
 						Literal: "1",
@@ -164,7 +179,9 @@ func TestParse3(t *testing.T) {
 					Column:  3,
 				},
 				Right: ast.BinaryExpression{
+					Type: ast.BINARY,
 					Left: ast.LiteralExpression{
+						Type: ast.LITERAL,
 						Literal: token.Token{
 							Type:    token.INT,
 							Literal: "2",
@@ -179,6 +196,7 @@ func TestParse3(t *testing.T) {
 						Column:  7,
 					},
 					Right: ast.LiteralExpression{
+						Type: ast.LITERAL,
 						Literal: token.Token{
 							Type:    token.INT,
 							Literal: "3",
@@ -221,9 +239,13 @@ func TestParse4(t *testing.T) {
 
 	expectedAst := ast.Ast{
 		ast.ExpressionStatement{
+			Type: ast.EXPR,
 			Expression: ast.BinaryExpression{
+				Type: ast.BINARY,
 				Left: ast.BinaryExpression{
+					Type: ast.BINARY,
 					Left: ast.LiteralExpression{
+						Type: ast.LITERAL,
 						Literal: token.Token{
 							Type:    token.INT,
 							Literal: "1",
@@ -238,6 +260,7 @@ func TestParse4(t *testing.T) {
 						Column:  3,
 					},
 					Right: ast.LiteralExpression{
+						Type: ast.LITERAL,
 						Literal: token.Token{
 							Type:    token.INT,
 							Literal: "2",
@@ -253,6 +276,7 @@ func TestParse4(t *testing.T) {
 					Column:  7,
 				},
 				Right: ast.LiteralExpression{
+					Type: ast.LITERAL,
 					Literal: token.Token{
 						Type:    token.INT,
 						Literal: "3",
@@ -294,8 +318,11 @@ func TestParse5(t *testing.T) {
 
 	expectedAst := ast.Ast{
 		ast.ExpressionStatement{
+			Type: ast.EXPR,
 			Expression: ast.BinaryExpression{
+				Type: ast.BINARY,
 				Left: ast.LiteralExpression{
+					Type: ast.LITERAL,
 					Literal: token.Token{
 						Type:    token.INT,
 						Literal: "1",
@@ -310,7 +337,9 @@ func TestParse5(t *testing.T) {
 					Column:  4,
 				},
 				Right: ast.BinaryExpression{
+					Type: ast.BINARY,
 					Left: ast.LiteralExpression{
+						Type: ast.LITERAL,
 						Literal: token.Token{
 							Type:    token.INT,
 							Literal: "2",
@@ -325,6 +354,7 @@ func TestParse5(t *testing.T) {
 						Column:  9,
 					},
 					Right: ast.LiteralExpression{
+						Type: ast.LITERAL,
 						Literal: token.Token{
 							Type:    token.INT,
 							Literal: "3",
@@ -367,6 +397,7 @@ func TestParse6(t *testing.T) {
 
 	expectedAst := ast.Ast{
 		ast.LetStatement{
+			Type: ast.LET,
 			Identifier: token.Token{
 				Type:    token.IDENT,
 				Literal: "a",
@@ -375,12 +406,77 @@ func TestParse6(t *testing.T) {
 				Column:  5,
 			},
 			Expression: ast.LiteralExpression{
+				Type: ast.LITERAL,
 				Literal: token.Token{
 					Type:    token.INT,
 					Literal: "42",
 					File:    "",
 					Line:    1,
 					Column:  9,
+				},
+			},
+		},
+	}
+
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := parser.New(tokens)
+	actualAst, err := p.Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expectedAst, actualAst) {
+		t.Fatalf(
+			strings.Dedent(`
+				           |Expected:
+				           |%+v
+				           |
+				           |Got:
+				           |%+v`),
+			expectedAst,
+			actualAst)
+	}
+}
+
+func TestParse7(t *testing.T) {
+	input := "return a + b;"
+
+	expectedAst := ast.Ast{
+		ast.ReturnStatement{
+			Type: ast.RETURN,
+			Expression: ast.BinaryExpression{
+				Type: ast.BINARY,
+				Left: ast.IdentifierExpression{
+					Type: ast.IDENT,
+					Identifier: token.Token{
+						Type:    token.IDENT,
+						Literal: "a",
+						File:    "",
+						Line:    1,
+						Column:  8,
+					},
+				},
+				Operator: token.Token{
+					Type:    token.PLUS,
+					Literal: "+",
+					File:    "",
+					Line:    1,
+					Column:  10,
+				},
+				Right: ast.IdentifierExpression{
+					Type: ast.IDENT,
+					Identifier: token.Token{
+						Type:    token.IDENT,
+						Literal: "b",
+						File:    "",
+						Line:    1,
+						Column:  12,
+					},
 				},
 			},
 		},

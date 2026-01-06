@@ -28,6 +28,10 @@ func (p *Parser) Parse() (ast.Ast, error) {
 			if err := p.parseLetStatement(); err != nil {
 				return p.ast, err
 			}
+		case token.RETURN:
+			if err := p.parseReturnStatement(); err != nil {
+				return p.ast, err
+			}
 		case token.LPAREN:
 			fallthrough
 		case token.INT:
@@ -52,7 +56,9 @@ func (p *Parser) parseLetStatement() error {
 		return err
 	}
 	p.nextToken()
-	node := ast.LetStatement{}
+	node := ast.LetStatement{
+		Type: ast.LET,
+	}
 	if err := p.expect(token.IDENT); err != nil {
 		return err
 	}
@@ -74,6 +80,27 @@ func (p *Parser) parseLetStatement() error {
 	return nil
 }
 
+func (p *Parser) parseReturnStatement() error {
+	if err := p.expect(token.RETURN); err != nil {
+		return err
+	}
+	p.nextToken()
+	if expr, err := p.parseExpression(0); err != nil {
+		return err
+	} else {
+		p.ast = append(p.ast, ast.ReturnStatement{
+			Type:       ast.RETURN,
+			Expression: expr,
+		})
+	}
+	p.nextToken()
+	if err := p.expect(token.SEMICOLON); err != nil {
+		return err
+	}
+	p.nextToken()
+	return nil
+}
+
 func (p *Parser) parseExpressionStatement() error {
 	node, err := p.parseExpression(0)
 	if err != nil {
@@ -84,7 +111,10 @@ func (p *Parser) parseExpressionStatement() error {
 		return err
 	}
 	p.nextToken()
-	node = ast.ExpressionStatement{Expression: node}
+	node = ast.ExpressionStatement{
+		Type:       ast.EXPR,
+		Expression: node,
+	}
 	p.ast = append(p.ast, node)
 	return nil
 }
@@ -105,6 +135,7 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 		}
 	case token.IDENT:
 		left = ast.IdentifierExpression{
+			Type:       ast.IDENT,
 			Identifier: p.token(),
 		}
 	case token.STRING:
@@ -113,6 +144,7 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 		fallthrough
 	case token.INT:
 		left = ast.LiteralExpression{
+			Type:    ast.LITERAL,
 			Literal: p.token(),
 		}
 	default:
@@ -134,6 +166,7 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 			return nil, err
 		}
 		left = ast.BinaryExpression{
+			Type:     ast.BINARY,
 			Left:     left,
 			Operator: operator,
 			Right:    right,
