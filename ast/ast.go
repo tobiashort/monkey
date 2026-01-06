@@ -5,6 +5,11 @@ import "github.com/tobiashort/monkey/token"
 type Node any
 type Ast []Node
 
+type LetStatement struct {
+	Identifier token.Token
+	Expression Node
+}
+
 type ExpressionStatement struct {
 	Expression Node
 }

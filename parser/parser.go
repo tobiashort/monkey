@@ -24,6 +24,10 @@ func New(tokens []token.Token) *Parser {
 func (p *Parser) Parse() (ast.Ast, error) {
 	for p.token().Type != token.EOF {
 		switch p.token().Type {
+		case token.LET:
+			if err := p.parseLetStatement(); err != nil {
+				return p.ast, err
+			}
 		case token.LPAREN:
 			fallthrough
 		case token.INT:
@@ -41,6 +45,33 @@ func (p *Parser) Parse() (ast.Ast, error) {
 		}
 	}
 	return p.ast, nil
+}
+
+func (p *Parser) parseLetStatement() error {
+	if err := p.expect(token.LET); err != nil {
+		return err
+	}
+	p.nextToken()
+	node := ast.LetStatement{}
+	if err := p.expect(token.IDENT); err != nil {
+		return err
+	}
+	node.Identifier = p.token()
+	p.nextToken()
+	p.expect(token.ASSIGN)
+	p.nextToken()
+	if expr, err := p.parseExpression(0); err != nil {
+		return err
+	} else {
+		node.Expression = expr
+	}
+	p.ast = append(p.ast, node)
+	p.nextToken()
+	if err := p.expect(token.SEMICOLON); err != nil {
+		return err
+	}
+	p.nextToken()
+	return nil
 }
 
 func (p *Parser) parseExpressionStatement() error {

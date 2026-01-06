@@ -361,3 +361,52 @@ func TestParse5(t *testing.T) {
 			actualAst)
 	}
 }
+
+func TestParse6(t *testing.T) {
+	input := "let a = 42;"
+
+	expectedAst := ast.Ast{
+		ast.LetStatement{
+			Identifier: token.Token{
+				Type:    token.IDENT,
+				Literal: "a",
+				File:    "",
+				Line:    1,
+				Column:  5,
+			},
+			Expression: ast.LiteralExpression{
+				Literal: token.Token{
+					Type:    token.INT,
+					Literal: "42",
+					File:    "",
+					Line:    1,
+					Column:  9,
+				},
+			},
+		},
+	}
+
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := parser.New(tokens)
+	actualAst, err := p.Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expectedAst, actualAst) {
+		t.Fatalf(
+			strings.Dedent(`
+				           |Expected:
+				           |%+v
+				           |
+				           |Got:
+				           |%+v`),
+			expectedAst,
+			actualAst)
+	}
+}
