@@ -243,6 +243,33 @@ func (l *Lexer) nextToken() token.Token {
 		})
 		l.position++
 		l.column++
+	case '"':
+		literal := "\""
+		escaped := false
+		for {
+			l.position++
+			if l.rune() == '\\' {
+				escaped = true
+				continue
+			}
+			if l.rune() == '"' && !escaped {
+				break
+			}
+			if escaped {
+				escaped = false
+			}
+			literal = literal + string(l.rune())
+		}
+		literal += "\""
+		tok = option.Some(token.Token{
+			Type:    token.STRING,
+			Literal: literal,
+			File:    l.file,
+			Line:    l.line,
+			Column:  l.column,
+		})
+		l.position++
+		l.column += len(literal)
 	case 0:
 		tok = option.Some(token.Token{
 			Type:    token.EOF,
@@ -362,6 +389,16 @@ func (l *Lexer) nextToken() token.Token {
 			})
 			l.position += len(f)
 			l.column += len(f)
+		} else if _, err := strconv.ParseFloat(f, 64); err == nil {
+			tok = option.Some(token.Token{
+				Type:    token.FLOAT,
+				Literal: f,
+				File:    l.file,
+				Line:    l.line,
+				Column:  l.column,
+			})
+			l.position += len(f)
+			l.column += len(f)
 		}
 	}
 
@@ -389,7 +426,10 @@ func (l *Lexer) rune() rune {
 
 func (l *Lexer) field() string {
 	fields := strings.FieldsFunc(l.input[l.position:], func(r rune) bool {
-		return unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r)
+		doSplit := unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r)
+		doSplit = doSplit && r != '_'
+		doSplit = doSplit && r != '.'
+		return doSplit
 	})
 	if len(fields) > 0 {
 		return fields[0]

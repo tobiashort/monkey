@@ -196,3 +196,35 @@ func TestNextToken4(t *testing.T) {
 		}
 	}
 }
+
+func TestNextToken5(t *testing.T) {
+	input :=
+		strings.Dedent(
+			`"foo" 0
+			|12.3`)
+
+	expectedTokens := []token.Token{
+		{Type: token.STRING, Literal: "\"foo\"", File: "", Line: 1, Column: 1},
+		{Type: token.INT, Literal: "0", File: "", Line: 1, Column: 7},
+		{Type: token.FLOAT, Literal: "12.3", File: "", Line: 2, Column: 1},
+		{Type: token.EOF, Literal: "", File: "", Line: 2, Column: 5},
+	}
+
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	for i, expectedToken := range expectedTokens {
+		actualToken := tokens[i]
+		if !reflect.DeepEqual(expectedToken, actualToken) {
+			t.Fatalf(
+				strings.Dedent(`
+				               |Expected: %+v
+				               |Got:      %+v`),
+				expectedToken,
+				actualToken)
+		}
+	}
+}

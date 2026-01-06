@@ -26,6 +26,10 @@ func (p *Parser) Parse() (ast.Ast, error) {
 		switch p.token().Type {
 		case token.INT:
 			fallthrough
+		case token.FLOAT:
+			fallthrough
+		case token.STRING:
+			fallthrough
 		case token.IDENT:
 			if err := p.parseExpressionStatement(); err != nil {
 				return p.ast, err
@@ -59,6 +63,10 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 		left = ast.IdentifierExpression{
 			Identifier: p.token(),
 		}
+	case token.STRING:
+		fallthrough
+	case token.FLOAT:
+		fallthrough
 	case token.INT:
 		left = ast.LiteralExpression{
 			Literal: p.token(),

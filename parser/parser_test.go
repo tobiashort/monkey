@@ -13,7 +13,10 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	input := `foobar;`
+	input := strings.Dedent(`foobar;
+							|"foobar";
+							|42;
+							|42.0;`)
 
 	expectedAst := ast.Ast{
 		ast.ExpressionStatement{
@@ -22,6 +25,36 @@ func TestParse(t *testing.T) {
 					Type:    token.IDENT,
 					Literal: "foobar",
 					Line:    1,
+					Column:  1,
+				},
+			},
+		},
+		ast.ExpressionStatement{
+			Expression: ast.LiteralExpression{
+				Literal: token.Token{
+					Type:    token.STRING,
+					Literal: "\"foobar\"",
+					Line:    2,
+					Column:  1,
+				},
+			},
+		},
+		ast.ExpressionStatement{
+			Expression: ast.LiteralExpression{
+				Literal: token.Token{
+					Type:    token.INT,
+					Literal: "42",
+					Line:    3,
+					Column:  1,
+				},
+			},
+		},
+		ast.ExpressionStatement{
+			Expression: ast.LiteralExpression{
+				Literal: token.Token{
+					Type:    token.FLOAT,
+					Literal: "42.0",
+					Line:    4,
 					Column:  1,
 				},
 			},
