@@ -58,7 +58,7 @@ const (
 
 func BindingPower(t Token) (int, error) {
 	switch t.Type {
-	case SEMICOLON:
+	case SEMICOLON, RPAREN:
 		return 0, nil
 	case EQUAL, NOT_EQUAL:
 		return 1, nil

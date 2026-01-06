@@ -24,6 +24,8 @@ func New(tokens []token.Token) *Parser {
 func (p *Parser) Parse() (ast.Ast, error) {
 	for p.token().Type != token.EOF {
 		switch p.token().Type {
+		case token.LPAREN:
+			fallthrough
 		case token.INT:
 			fallthrough
 		case token.FLOAT:
@@ -59,6 +61,17 @@ func (p *Parser) parseExpressionStatement() error {
 func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 	var left ast.Node
 	switch p.token().Type {
+	case token.LPAREN:
+		p.nextToken()
+		var err error
+		left, err = p.parseExpression(0)
+		if err != nil {
+			return nil, err
+		}
+		p.nextToken()
+		if err := p.expect(token.RPAREN); err != nil {
+			return nil, err
+		}
 	case token.IDENT:
 		left = ast.IdentifierExpression{
 			Identifier: p.token(),

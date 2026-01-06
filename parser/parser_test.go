@@ -288,3 +288,76 @@ func TestParse4(t *testing.T) {
 			actualAst)
 	}
 }
+
+func TestParse5(t *testing.T) {
+	input := `(1 * (2 + 3));`
+
+	expectedAst := ast.Ast{
+		ast.ExpressionStatement{
+			Expression: ast.BinaryExpression{
+				Left: ast.LiteralExpression{
+					Literal: token.Token{
+						Type:    token.INT,
+						Literal: "1",
+						Line:    1,
+						Column:  2,
+					},
+				},
+				Operator: token.Token{
+					Type:    token.ASTERISK,
+					Literal: "*",
+					Line:    1,
+					Column:  4,
+				},
+				Right: ast.BinaryExpression{
+					Left: ast.LiteralExpression{
+						Literal: token.Token{
+							Type:    token.INT,
+							Literal: "2",
+							Line:    1,
+							Column:  7,
+						},
+					},
+					Operator: token.Token{
+						Type:    token.PLUS,
+						Literal: "+",
+						Line:    1,
+						Column:  9,
+					},
+					Right: ast.LiteralExpression{
+						Literal: token.Token{
+							Type:    token.INT,
+							Literal: "3",
+							Line:    1,
+							Column:  11,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := parser.New(tokens)
+	actualAst, err := p.Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expectedAst, actualAst) {
+		t.Fatalf(
+			strings.Dedent(`
+				           |Expected:
+				           |%+v
+				           |
+				           |Got:
+				           |%+v`),
+			expectedAst,
+			actualAst)
+	}
+}
