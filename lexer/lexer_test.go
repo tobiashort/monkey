@@ -10,7 +10,7 @@ import (
 	"github.com/tobiashort/utils-go/strings"
 )
 
-func TestNextToken(t *testing.T) {
+func TestAnalyze(t *testing.T) {
 	input := `=+(){},;`
 
 	expectedTokens := []token.Token{
@@ -44,7 +44,7 @@ func TestNextToken(t *testing.T) {
 	}
 }
 
-func TestNextToken2(t *testing.T) {
+func TestAnalyze2(t *testing.T) {
 	input := strings.Dedent(`let five = 5;
                             |let ten = 10;
                             |let add = fn(x, y) {
@@ -112,7 +112,7 @@ func TestNextToken2(t *testing.T) {
 	}
 }
 
-func TestNextToken3(t *testing.T) {
+func TestAnalyze3(t *testing.T) {
 	input := `==!!=-/*<><=>=`
 
 	expectedTokens := []token.Token{
@@ -147,7 +147,7 @@ func TestNextToken3(t *testing.T) {
 	}
 }
 
-func TestNextToken4(t *testing.T) {
+func TestAnalyze4(t *testing.T) {
 	input :=
 		strings.Dedent(
 			`if (5 < 10) {
@@ -197,7 +197,7 @@ func TestNextToken4(t *testing.T) {
 	}
 }
 
-func TestNextToken5(t *testing.T) {
+func TestAnalyze5(t *testing.T) {
 	input :=
 		strings.Dedent(
 			`"foo" 0
