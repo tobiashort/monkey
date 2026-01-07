@@ -24,6 +24,10 @@ func New(tokens []token.Token) *Parser {
 func (p *Parser) Parse() (ast.Ast, error) {
 	for p.token().Type != token.EOF {
 		switch p.token().Type {
+		case token.LBRACE:
+			if err := p.parseBlock(); err != nil {
+				return p.ast, err
+			}
 		case token.LET:
 			if err := p.parseLetStatement(); err != nil {
 				return p.ast, err
@@ -49,6 +53,50 @@ func (p *Parser) Parse() (ast.Ast, error) {
 		}
 	}
 	return p.ast, nil
+}
+
+func (p *Parser) parseBlock() error {
+	depth := 1
+	lbrace := p.token()
+	tokens := make([]token.Token, 0)
+	for p.token().Type != token.EOF {
+		t := p.nextToken()
+		if t.Type == token.LBRACE {
+			depth++
+			tokens = append(tokens, t)
+		} else if t.Type == token.RBRACE {
+			depth--
+			if depth == 0 {
+				break
+			} else {
+				tokens = append(tokens, t)
+			}
+		} else {
+			tokens = append(tokens, t)
+		}
+	}
+	if depth != 0 {
+		return fmt.Errorf("%s:%d:%d: unclosed block", lbrace.File, lbrace.Line, lbrace.Column)
+	}
+	tokens = append(tokens, token.Token{
+		Type:    token.EOF,
+		Literal: "",
+		File:    tokens[len(tokens)-1].File,
+		Line:    tokens[len(tokens)-1].Line,
+		Column:  tokens[len(tokens)-1].Column + 1,
+	})
+	np := New(tokens)
+	nast, err := np.Parse()
+	if err != nil {
+		return err
+	}
+	block := ast.Block{
+		Type: ast.BLOCK,
+		Ast:  nast,
+	}
+	p.ast = append(p.ast, block)
+	p.nextToken()
+	return nil
 }
 
 func (p *Parser) parseLetStatement() error {

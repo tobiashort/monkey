@@ -12,10 +12,17 @@ const (
 	BINARY  = "BINARY"
 	IDENT   = "IDENT"
 	LITERAL = "LITERAL"
+	IF      = "IF"
+	BLOCK   = "BLOCK"
 )
 
 type Node any
 type Ast []Node
+
+type Block struct {
+	Type NodeType
+	Ast  Ast
+}
 
 type LetStatement struct {
 	Type       NodeType
@@ -54,4 +61,11 @@ type IdentifierExpression struct {
 type LiteralExpression struct {
 	Type    NodeType
 	Literal token.Token
+}
+
+type IfExpression struct {
+	Type        NodeType
+	Condition   Node
+	Consequence Node
+	Alternative Node
 }

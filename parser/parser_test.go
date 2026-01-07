@@ -474,3 +474,39 @@ func TestParse8(t *testing.T) {
 
 	test(t, input, expectedAst)
 }
+
+func TestParse9(t *testing.T) {
+	input := strings.Dedent(`{
+			                |  {
+			                |    42;
+			                |  }
+		                    |}`)
+
+	expectedAst := ast.Ast{
+		ast.Block{
+			Type: ast.BLOCK,
+			Ast: ast.Ast{
+				ast.Block{
+					Type: ast.BLOCK,
+					Ast: ast.Ast{
+						ast.ExpressionStatement{
+							Type: ast.EXPR,
+							Expression: ast.LiteralExpression{
+								Type: ast.LITERAL,
+								Literal: token.Token{
+									Type:    token.INT,
+									Literal: "42",
+									File:    "",
+									Line:    3,
+									Column:  5,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	test(t, input, expectedAst)
+}
