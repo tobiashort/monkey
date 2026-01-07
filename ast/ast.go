@@ -8,6 +8,7 @@ const (
 	LET     = "LET"
 	RETURN  = "RETURN"
 	EXPR    = "EXPR"
+	UNARY   = "UNARY"
 	BINARY  = "BINARY"
 	IDENT   = "IDENT"
 	LITERAL = "LITERAL"
@@ -30,6 +31,12 @@ type ReturnStatement struct {
 type ExpressionStatement struct {
 	Type       NodeType
 	Expression Node
+}
+
+type UnaryExpression struct {
+	Type     NodeType
+	Operator token.Token
+	Right    Node
 }
 
 type BinaryExpression struct {

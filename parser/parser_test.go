@@ -12,6 +12,32 @@ import (
 	"github.com/tobiashort/monkey/token"
 )
 
+func test(t *testing.T, input string, expectedAst ast.Ast) {
+	l := lexer.New("", input)
+	tokens, err := l.Analyze()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := parser.New(tokens)
+	actualAst, err := p.Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expectedAst, actualAst) {
+		t.Fatalf(
+			strings.Dedent(`
+				           |Expected:
+				           |%+v
+				           |
+				           |Got:
+				           |%+v`),
+			expectedAst,
+			actualAst)
+	}
+}
+
 func TestParse(t *testing.T) {
 	input := strings.Dedent(`foobar;
 							|"foobar";
@@ -69,29 +95,7 @@ func TestParse(t *testing.T) {
 		},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := parser.New(tokens)
-	actualAst, err := p.Parse()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !reflect.DeepEqual(expectedAst, actualAst) {
-		t.Fatalf(
-			strings.Dedent(`
-				           |Expected:
-				           |%+v
-				           |
-				           |Got:
-				           |%+v`),
-			expectedAst,
-			actualAst)
-	}
+	test(t, input, expectedAst)
 }
 
 func TestParse2(t *testing.T) {
@@ -130,29 +134,7 @@ func TestParse2(t *testing.T) {
 		},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := parser.New(tokens)
-	actualAst, err := p.Parse()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !reflect.DeepEqual(expectedAst, actualAst) {
-		t.Fatalf(
-			strings.Dedent(`
-				           |Expected:
-				           |%+v
-				           |
-				           |Got:
-				           |%+v`),
-			expectedAst,
-			actualAst)
-	}
+	test(t, input, expectedAst)
 }
 
 func TestParse3(t *testing.T) {
@@ -209,29 +191,7 @@ func TestParse3(t *testing.T) {
 		},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := parser.New(tokens)
-	actualAst, err := p.Parse()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !reflect.DeepEqual(expectedAst, actualAst) {
-		t.Fatalf(
-			strings.Dedent(`
-				           |Expected:
-				           |%+v
-				           |
-				           |Got:
-				           |%+v`),
-			expectedAst,
-			actualAst)
-	}
+	test(t, input, expectedAst)
 }
 
 func TestParse4(t *testing.T) {
@@ -288,29 +248,7 @@ func TestParse4(t *testing.T) {
 		},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := parser.New(tokens)
-	actualAst, err := p.Parse()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !reflect.DeepEqual(expectedAst, actualAst) {
-		t.Fatalf(
-			strings.Dedent(`
-				           |Expected:
-				           |%+v
-				           |
-				           |Got:
-				           |%+v`),
-			expectedAst,
-			actualAst)
-	}
+	test(t, input, expectedAst)
 }
 
 func TestParse5(t *testing.T) {
@@ -367,29 +305,7 @@ func TestParse5(t *testing.T) {
 		},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := parser.New(tokens)
-	actualAst, err := p.Parse()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !reflect.DeepEqual(expectedAst, actualAst) {
-		t.Fatalf(
-			strings.Dedent(`
-				           |Expected:
-				           |%+v
-				           |
-				           |Got:
-				           |%+v`),
-			expectedAst,
-			actualAst)
-	}
+	test(t, input, expectedAst)
 }
 
 func TestParse6(t *testing.T) {
@@ -418,29 +334,7 @@ func TestParse6(t *testing.T) {
 		},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := parser.New(tokens)
-	actualAst, err := p.Parse()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !reflect.DeepEqual(expectedAst, actualAst) {
-		t.Fatalf(
-			strings.Dedent(`
-				           |Expected:
-				           |%+v
-				           |
-				           |Got:
-				           |%+v`),
-			expectedAst,
-			actualAst)
-	}
+	test(t, input, expectedAst)
 }
 
 func TestParse7(t *testing.T) {
@@ -482,27 +376,101 @@ func TestParse7(t *testing.T) {
 		},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatal(err)
+	test(t, input, expectedAst)
+}
+
+func TestParse8(t *testing.T) {
+	input := strings.Dedent(`1 - -2;
+		                    |foo && !bar;`)
+
+	expectedAst := ast.Ast{
+		ast.ExpressionStatement{
+			Type: ast.EXPR,
+			Expression: ast.BinaryExpression{
+				Type: ast.BINARY,
+				Left: ast.LiteralExpression{
+					Type: ast.LITERAL,
+					Literal: token.Token{
+						Type:    token.INT,
+						Literal: "1",
+						File:    "",
+						Line:    1,
+						Column:  1,
+					},
+				},
+				Operator: token.Token{
+					Type:    token.MINUS,
+					Literal: "-",
+					File:    "",
+					Line:    1,
+					Column:  3,
+				},
+				Right: ast.UnaryExpression{
+					Type: ast.UNARY,
+					Operator: token.Token{
+						Type:    token.MINUS,
+						Literal: "-",
+						File:    "",
+						Line:    1,
+						Column:  5,
+					},
+					Right: ast.LiteralExpression{
+						Type: ast.LITERAL,
+						Literal: token.Token{
+							Type:    token.INT,
+							Literal: "2",
+							File:    "",
+							Line:    1,
+							Column:  6,
+						},
+					},
+				},
+			},
+		},
+		ast.ExpressionStatement{
+			Type: ast.EXPR,
+			Expression: ast.BinaryExpression{
+				Type: ast.BINARY,
+				Left: ast.IdentifierExpression{
+					Type: ast.IDENT,
+					Identifier: token.Token{
+						Type:    token.IDENT,
+						Literal: "foo",
+						File:    "",
+						Line:    2,
+						Column:  1,
+					},
+				},
+				Operator: token.Token{
+					Type:    token.LAND,
+					Literal: "&&",
+					File:    "",
+					Line:    2,
+					Column:  5,
+				},
+				Right: ast.UnaryExpression{
+					Type: ast.UNARY,
+					Operator: token.Token{
+						Type:    token.BANG,
+						Literal: "!",
+						File:    "",
+						Line:    2,
+						Column:  8,
+					},
+					Right: ast.IdentifierExpression{
+						Type: ast.IDENT,
+						Identifier: token.Token{
+							Type:    token.IDENT,
+							Literal: "bar",
+							File:    "",
+							Line:    2,
+							Column:  9,
+						},
+					},
+				},
+			},
+		},
 	}
 
-	p := parser.New(tokens)
-	actualAst, err := p.Parse()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !reflect.DeepEqual(expectedAst, actualAst) {
-		t.Fatalf(
-			strings.Dedent(`
-				           |Expected:
-				           |%+v
-				           |
-				           |Got:
-				           |%+v`),
-			expectedAst,
-			actualAst)
-	}
+	test(t, input, expectedAst)
 }

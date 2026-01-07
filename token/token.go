@@ -37,6 +37,10 @@ const (
 	GT        = ">"
 	LEQT      = "<="
 	GEQT      = ">="
+	BAND      = "&"
+	LAND      = "&&"
+	BOR       = "|"
+	LOR       = "||"
 
 	// Delimiters
 	COMMA     = ","
@@ -60,16 +64,24 @@ func BindingPower(t Token) (int, error) {
 	switch t.Type {
 	case SEMICOLON, RPAREN:
 		return 0, nil
-	case EQUAL, NOT_EQUAL:
+	case LOR:
 		return 1, nil
-	case LT, GT, LEQT, GEQT:
+	case LAND:
 		return 2, nil
-	case PLUS, MINUS:
+	case BOR:
 		return 3, nil
-	case ASTERISK, SLASH:
+	case BAND:
 		return 4, nil
-	case BANG:
+	case EQUAL, NOT_EQUAL:
 		return 5, nil
+	case LT, GT, LEQT, GEQT:
+		return 6, nil
+	case PLUS, MINUS:
+		return 7, nil
+	case ASTERISK, SLASH:
+		return 8, nil
+	case BANG:
+		return 9, nil
 	default:
 		return -1, fmt.Errorf("%s:%d:%d: illegal token type %q", t.File, t.Line, t.Column, t.Type)
 	}

@@ -122,6 +122,20 @@ func (p *Parser) parseExpressionStatement() error {
 func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 	var left ast.Node
 	switch p.token().Type {
+	case token.MINUS:
+		fallthrough
+	case token.BANG:
+		operator := p.token()
+		p.nextToken()
+		right, err := p.parseExpression(0)
+		if err != nil {
+			return nil, err
+		}
+		left = ast.UnaryExpression{
+			Type:     ast.UNARY,
+			Operator: operator,
+			Right:    right,
+		}
 	case token.LPAREN:
 		p.nextToken()
 		var err error

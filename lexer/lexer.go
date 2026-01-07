@@ -101,6 +101,48 @@ func (l *Lexer) nextToken() token.Token {
 			l.position++
 			l.column++
 		}
+	case '&':
+		tok = option.Some(token.Token{
+			Type:    token.BAND,
+			Literal: string(r),
+			File:    l.file,
+			Line:    l.line,
+			Column:  l.column,
+		})
+		l.position++
+		l.column++
+		if nr := l.rune(); nr == '&' {
+			tok = option.Some(token.Token{
+				Type:    token.LAND,
+				Literal: string(r) + string(nr),
+				File:    l.file,
+				Line:    l.line,
+				Column:  l.column - 1,
+			})
+			l.position++
+			l.column++
+		}
+	case '|':
+		tok = option.Some(token.Token{
+			Type:    token.BOR,
+			Literal: string(r),
+			File:    l.file,
+			Line:    l.line,
+			Column:  l.column,
+		})
+		l.position++
+		l.column++
+		if nr := l.rune(); nr == '|' {
+			tok = option.Some(token.Token{
+				Type:    token.LOR,
+				Literal: string(r) + string(nr),
+				File:    l.file,
+				Line:    l.line,
+				Column:  l.column - 1,
+			})
+			l.position++
+			l.column++
+		}
 	case '+':
 		tok = option.Some(token.Token{
 			Type:    token.PLUS,

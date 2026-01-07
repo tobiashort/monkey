@@ -10,21 +10,7 @@ import (
 	"github.com/tobiashort/utils-go/strings"
 )
 
-func TestAnalyze(t *testing.T) {
-	input := `=+(){},;`
-
-	expectedTokens := []token.Token{
-		{Type: token.ASSIGN, Literal: "=", File: "", Line: 1, Column: 1},
-		{Type: token.PLUS, Literal: "+", File: "", Line: 1, Column: 2},
-		{Type: token.LPAREN, Literal: "(", File: "", Line: 1, Column: 3},
-		{Type: token.RPAREN, Literal: ")", File: "", Line: 1, Column: 4},
-		{Type: token.LBRACE, Literal: "{", File: "", Line: 1, Column: 5},
-		{Type: token.RBRACE, Literal: "}", File: "", Line: 1, Column: 6},
-		{Type: token.COMMA, Literal: ",", File: "", Line: 1, Column: 7},
-		{Type: token.SEMICOLON, Literal: ";", File: "", Line: 1, Column: 8},
-		{Type: token.EOF, Literal: "", File: "", Line: 1, Column: 9},
-	}
-
+func test(t *testing.T, input string, expectedTokens []token.Token) {
 	l := lexer.New("", input)
 	tokens, err := l.Analyze()
 	if err != nil {
@@ -42,6 +28,24 @@ func TestAnalyze(t *testing.T) {
 				actualToken)
 		}
 	}
+}
+
+func TestAnalyze(t *testing.T) {
+	input := `=+(){},;`
+
+	expectedTokens := []token.Token{
+		{Type: token.ASSIGN, Literal: "=", File: "", Line: 1, Column: 1},
+		{Type: token.PLUS, Literal: "+", File: "", Line: 1, Column: 2},
+		{Type: token.LPAREN, Literal: "(", File: "", Line: 1, Column: 3},
+		{Type: token.RPAREN, Literal: ")", File: "", Line: 1, Column: 4},
+		{Type: token.LBRACE, Literal: "{", File: "", Line: 1, Column: 5},
+		{Type: token.RBRACE, Literal: "}", File: "", Line: 1, Column: 6},
+		{Type: token.COMMA, Literal: ",", File: "", Line: 1, Column: 7},
+		{Type: token.SEMICOLON, Literal: ";", File: "", Line: 1, Column: 8},
+		{Type: token.EOF, Literal: "", File: "", Line: 1, Column: 9},
+	}
+
+	test(t, input, expectedTokens)
 }
 
 func TestAnalyze2(t *testing.T) {
@@ -93,27 +97,11 @@ func TestAnalyze2(t *testing.T) {
 		{Type: token.EOF, Literal: "", File: "", Line: 7, Column: 1},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	for i, expectedToken := range expectedTokens {
-		actualToken := tokens[i]
-		if !reflect.DeepEqual(expectedToken, actualToken) {
-			t.Fatalf(
-				strings.Dedent(`
-				               |Expected: %+v
-				               |Got:      %+v`),
-				expectedToken,
-				actualToken)
-		}
-	}
+	test(t, input, expectedTokens)
 }
 
 func TestAnalyze3(t *testing.T) {
-	input := `==!!=-/*<><=>=`
+	input := `==!!=-/*<><=>=&&||&|`
 
 	expectedTokens := []token.Token{
 		{Type: token.EQUAL, Literal: "==", File: "", Line: 1, Column: 1},
@@ -126,25 +114,14 @@ func TestAnalyze3(t *testing.T) {
 		{Type: token.GT, Literal: ">", File: "", Line: 1, Column: 10},
 		{Type: token.LEQT, Literal: "<=", File: "", Line: 1, Column: 11},
 		{Type: token.GEQT, Literal: ">=", File: "", Line: 1, Column: 13},
+		{Type: token.LAND, Literal: "&&", File: "", Line: 1, Column: 15},
+		{Type: token.LOR, Literal: "||", File: "", Line: 1, Column: 17},
+		{Type: token.BAND, Literal: "&", File: "", Line: 1, Column: 19},
+		{Type: token.BOR, Literal: "|", File: "", Line: 1, Column: 20},
+		{Type: token.EOF, Literal: "", File: "", Line: 1, Column: 21},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	for i, expectedToken := range expectedTokens {
-		actualToken := tokens[i]
-		if !reflect.DeepEqual(expectedToken, actualToken) {
-			t.Fatalf(
-				strings.Dedent(`
-				               |Expected: %+v
-				               |Got:      %+v`),
-				expectedToken,
-				actualToken)
-		}
-	}
+	test(t, input, expectedTokens)
 }
 
 func TestAnalyze4(t *testing.T) {
@@ -178,26 +155,26 @@ func TestAnalyze4(t *testing.T) {
 		{Type: token.EOF, Literal: "", File: "", Line: 6, Column: 1},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	for i, expectedToken := range expectedTokens {
-		actualToken := tokens[i]
-		if !reflect.DeepEqual(expectedToken, actualToken) {
-			t.Fatalf(
-				strings.Dedent(`
-				               |Expected: %+v
-				               |Got:      %+v`),
-				expectedToken,
-				actualToken)
-		}
-	}
+	test(t, input, expectedTokens)
 }
 
 func TestAnalyze5(t *testing.T) {
+	input := "let x = -5;"
+
+	expectedTokens := []token.Token{
+		{Type: token.LET, Literal: "let", File: "", Line: 1, Column: 1},
+		{Type: token.IDENT, Literal: "x", File: "", Line: 1, Column: 5},
+		{Type: token.ASSIGN, Literal: "=", File: "", Line: 1, Column: 7},
+		{Type: token.MINUS, Literal: "-", File: "", Line: 1, Column: 9},
+		{Type: token.INT, Literal: "5", File: "", Line: 1, Column: 10},
+		{Type: token.SEMICOLON, Literal: ";", File: "", Line: 1, Column: 11},
+		{Type: token.EOF, Literal: "", File: "", Line: 1, Column: 12},
+	}
+
+	test(t, input, expectedTokens)
+}
+
+func TestAnalyze6(t *testing.T) {
 	input :=
 		strings.Dedent(
 			`"foo" 0
@@ -210,21 +187,5 @@ func TestAnalyze5(t *testing.T) {
 		{Type: token.EOF, Literal: "", File: "", Line: 2, Column: 5},
 	}
 
-	l := lexer.New("", input)
-	tokens, err := l.Analyze()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	for i, expectedToken := range expectedTokens {
-		actualToken := tokens[i]
-		if !reflect.DeepEqual(expectedToken, actualToken) {
-			t.Fatalf(
-				strings.Dedent(`
-				               |Expected: %+v
-				               |Got:      %+v`),
-				expectedToken,
-				actualToken)
-		}
-	}
+	test(t, input, expectedTokens)
 }
