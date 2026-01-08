@@ -1,10 +1,9 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/tobiashort/monkey/ast"
 	"github.com/tobiashort/monkey/token"
+	"github.com/tobiashort/utils-go/errors"
 )
 
 type Parser struct {
@@ -25,8 +24,10 @@ func (p *Parser) Parse() (ast.Ast, error) {
 	for p.token().Type != token.EOF {
 		switch p.token().Type {
 		case token.LBRACE:
-			if err := p.parseBlock(); err != nil {
+			if block, err := p.parseBlock(); err != nil {
 				return p.ast, err
+			} else {
+				p.ast = append(p.ast, block)
 			}
 		case token.LET:
 			if err := p.parseLetStatement(); err != nil {
@@ -36,26 +37,25 @@ func (p *Parser) Parse() (ast.Ast, error) {
 			if err := p.parseReturnStatement(); err != nil {
 				return p.ast, err
 			}
-		case token.LPAREN:
-			fallthrough
-		case token.INT:
-			fallthrough
-		case token.FLOAT:
-			fallthrough
-		case token.STRING:
-			fallthrough
-		case token.IDENT:
+		case token.IF:
+			if err := p.parseIfStatement(); err != nil {
+				return p.ast, err
+			}
+		case token.LPAREN, token.INT, token.FLOAT, token.STRING, token.IDENT:
 			if err := p.parseExpressionStatement(); err != nil {
 				return p.ast, err
 			}
 		default:
-			return p.ast, fmt.Errorf("%s:%d:%d: illegal token type %q", p.token().File, p.token().Line, p.token().Column, p.token().Type)
+			return p.ast, errors.WithCtxf("%s:%d:%d: illegal token type %q", p.token().File, p.token().Line, p.token().Column, p.token().Type)
 		}
 	}
 	return p.ast, nil
 }
 
-func (p *Parser) parseBlock() error {
+func (p *Parser) parseBlock() (ast.Node, error) {
+	if err := p.expect(token.LBRACE); err != nil {
+		return nil, err
+	}
 	depth := 1
 	lbrace := p.token()
 	tokens := make([]token.Token, 0)
@@ -76,7 +76,7 @@ func (p *Parser) parseBlock() error {
 		}
 	}
 	if depth != 0 {
-		return fmt.Errorf("%s:%d:%d: unclosed block", lbrace.File, lbrace.Line, lbrace.Column)
+		return nil, errors.WithCtxf("%s:%d:%d: unclosed block", lbrace.File, lbrace.Line, lbrace.Column)
 	}
 	tokens = append(tokens, token.Token{
 		Type:    token.EOF,
@@ -88,15 +88,14 @@ func (p *Parser) parseBlock() error {
 	np := New(tokens)
 	nast, err := np.Parse()
 	if err != nil {
-		return err
+		return nast, err
 	}
 	block := ast.Block{
 		Type: ast.BLOCK,
 		Ast:  nast,
 	}
-	p.ast = append(p.ast, block)
 	p.nextToken()
-	return nil
+	return block, nil
 }
 
 func (p *Parser) parseLetStatement() error {
@@ -149,6 +148,37 @@ func (p *Parser) parseReturnStatement() error {
 	return nil
 }
 
+func (p *Parser) parseIfStatement() error {
+	if err := p.expect(token.IF); err != nil {
+		return err
+	}
+	expr := ast.IfStatement{
+		Type: ast.IF,
+	}
+	p.nextToken()
+	if cond, err := p.parseExpression(0); err != nil {
+		return err
+	} else {
+		expr.Condition = cond
+		p.nextToken()
+	}
+	if cons, err := p.parseBlock(); err != nil {
+		return err
+	} else {
+		expr.Consequence = cons
+	}
+	if p.token().Type == token.ELSE {
+		p.nextToken()
+		if alt, err := p.parseBlock(); err != nil {
+			return err
+		} else {
+			expr.Alternative = alt
+		}
+	}
+	p.ast = append(p.ast, expr)
+	return nil
+}
+
 func (p *Parser) parseExpressionStatement() error {
 	node, err := p.parseExpression(0)
 	if err != nil {
@@ -170,9 +200,7 @@ func (p *Parser) parseExpressionStatement() error {
 func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 	var left ast.Node
 	switch p.token().Type {
-	case token.MINUS:
-		fallthrough
-	case token.BANG:
+	case token.MINUS, token.BANG:
 		operator := p.token()
 		p.nextToken()
 		right, err := p.parseExpression(0)
@@ -200,17 +228,13 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 			Type:       ast.IDENT,
 			Identifier: p.token(),
 		}
-	case token.STRING:
-		fallthrough
-	case token.FLOAT:
-		fallthrough
-	case token.INT:
+	case token.STRING, token.FLOAT, token.INT:
 		left = ast.LiteralExpression{
 			Type:    ast.LITERAL,
 			Literal: p.token(),
 		}
 	default:
-		return nil, fmt.Errorf("%s:%d:%d: illegal token type %q", p.token().File, p.token().Line, p.token().Column, p.token().Type)
+		return nil, errors.WithCtxf("%s:%d:%d: illegal token type %q", p.token().File, p.token().Line, p.token().Column, p.token().Type)
 	}
 
 	for {
@@ -241,7 +265,7 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 func (p *Parser) expect(tokenType token.TokenType) error {
 	t := p.token()
 	if t.Type != tokenType {
-		return fmt.Errorf("parse error %s %d:%d: got %q, expected %q", t.File, t.Line, t.Column, t.Type, tokenType)
+		return errors.WithCtxf("parse error %s %d:%d: got %q, expected %q", t.File, t.Line, t.Column, t.Type, tokenType)
 	}
 	return nil
 }

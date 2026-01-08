@@ -1,8 +1,6 @@
 package token
 
-import (
-	"fmt"
-)
+import "github.com/tobiashort/utils-go/errors"
 
 type TokenType = string
 
@@ -62,7 +60,7 @@ const (
 
 func BindingPower(t Token) (int, error) {
 	switch t.Type {
-	case SEMICOLON, RPAREN:
+	case SEMICOLON, RPAREN, LBRACE:
 		return 0, nil
 	case LOR:
 		return 1, nil
@@ -83,6 +81,6 @@ func BindingPower(t Token) (int, error) {
 	case BANG:
 		return 9, nil
 	default:
-		return -1, fmt.Errorf("%s:%d:%d: illegal token type %q", t.File, t.Line, t.Column, t.Type)
+		return -1, errors.WithCtxf("%s:%d:%d: illegal token type %q", t.File, t.Line, t.Column, t.Type)
 	}
 }

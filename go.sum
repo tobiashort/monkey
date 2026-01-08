@@ -1,2 +1,6 @@
-github.com/tobiashort/utils-go v0.0.0-20260101124110-58662b175096 h1:r3E8I7cqANiKHVF0Bf1nleUFrSgg2QwuokJSWOuh/Yc=
-github.com/tobiashort/utils-go v0.0.0-20260101124110-58662b175096/go.mod h1:3wsCtfMiXqp06v1rGwOpa8djcN7gBE1aVW7AobOjJBE=
+github.com/tobiashort/utils-go v0.0.0-20260108063144-b6e702750f99 h1:EXdeS3NNQ1PKeaivLUwgrthAoz9hvhNtZYbeQE5Y5rE=
+github.com/tobiashort/utils-go v0.0.0-20260108063144-b6e702750f99/go.mod h1:3wsCtfMiXqp06v1rGwOpa8djcN7gBE1aVW7AobOjJBE=
+github.com/tobiashort/utils-go v0.0.0-20260108163133-905b180c1137 h1:OrHSo4aMXQPjItrIrTW5LKOmz2408Y+f5VU7JnBREvo=
+github.com/tobiashort/utils-go v0.0.0-20260108163133-905b180c1137/go.mod h1:3wsCtfMiXqp06v1rGwOpa8djcN7gBE1aVW7AobOjJBE=
+github.com/tobiashort/utils-go v0.0.0-20260108163948-af84b247a513 h1:bLMveLwhsKbGy1cB8OeMOj3apmOd1SlvW8KwZJO5zhk=
+github.com/tobiashort/utils-go v0.0.0-20260108163948-af84b247a513/go.mod h1:3wsCtfMiXqp06v1rGwOpa8djcN7gBE1aVW7AobOjJBE=

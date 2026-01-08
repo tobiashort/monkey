@@ -1,12 +1,12 @@
 package lexer
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/tobiashort/monkey/token"
+	"github.com/tobiashort/utils-go/errors"
 	"github.com/tobiashort/utils-go/option"
 )
 
@@ -37,7 +37,7 @@ func (l *Lexer) Analyze() ([]token.Token, error) {
 			return tokens, nil
 		}
 		if t.Type == token.ILLEGAL {
-			return tokens, fmt.Errorf("%s:%d:%d illegal token %q", t.File, t.Line, t.Column, t.Literal)
+			return tokens, errors.WithCtxf("%s:%d:%d illegal token %q", t.File, t.Line, t.Column, t.Literal)
 		}
 	}
 }

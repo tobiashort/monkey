@@ -510,3 +510,85 @@ func TestParse9(t *testing.T) {
 
 	test(t, input, expectedAst)
 }
+
+func TestParse10(t *testing.T) {
+	input := strings.Dedent(`if (x == 23) {
+		                    |  return "great";
+		                    |} else {
+		                    |  return "also cool";
+		                    |}`)
+
+	expectedAst := ast.Ast{
+		ast.IfStatement{
+			Type: ast.IF,
+			Condition: ast.BinaryExpression{
+				Type: ast.BINARY,
+				Left: ast.IdentifierExpression{
+					Type: ast.IDENT,
+					Identifier: token.Token{
+						Type:    token.IDENT,
+						Literal: "x",
+						File:    "",
+						Line:    1,
+						Column:  5,
+					},
+				},
+				Operator: token.Token{
+					Type:    token.EQUAL,
+					Literal: "==",
+					File:    "",
+					Line:    1,
+					Column:  7,
+				},
+				Right: ast.LiteralExpression{
+					Type: ast.LITERAL,
+					Literal: token.Token{
+						Type:    token.INT,
+						Literal: "23",
+						File:    "",
+						Line:    1,
+						Column:  10,
+					},
+				},
+			},
+			Consequence: ast.Block{
+				Type: ast.BLOCK,
+				Ast: ast.Ast{
+					ast.ReturnStatement{
+						Type: ast.RETURN,
+						Expression: ast.LiteralExpression{
+							Type: ast.LITERAL,
+							Literal: token.Token{
+								Type:    token.STRING,
+								Literal: "\"great\"",
+								File:    "",
+								Line:    2,
+								Column:  10,
+							},
+						},
+					},
+				},
+			},
+			Alternative: ast.Block{
+				Type: ast.BLOCK,
+				Ast: ast.Ast{
+					ast.ReturnStatement{
+						Type: ast.RETURN,
+						Expression: ast.LiteralExpression{
+							Type: ast.LITERAL,
+							Literal: token.Token{
+								Type:    token.STRING,
+								Literal: "\"also cool\"",
+								File:    "",
+								Line:    4,
+								Column:  10,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	test(t, input, expectedAst)
+}

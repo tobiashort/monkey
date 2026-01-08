@@ -24,6 +24,13 @@ type Block struct {
 	Ast  Ast
 }
 
+type IfStatement struct {
+	Type        NodeType
+	Condition   Node
+	Consequence Node
+	Alternative Node
+}
+
 type LetStatement struct {
 	Type       NodeType
 	Identifier token.Token
@@ -61,11 +68,4 @@ type IdentifierExpression struct {
 type LiteralExpression struct {
 	Type    NodeType
 	Literal token.Token
-}
-
-type IfExpression struct {
-	Type        NodeType
-	Condition   Node
-	Consequence Node
-	Alternative Node
 }
