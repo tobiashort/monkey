@@ -1,6 +1,7 @@
-# github.com/tobiashort/utils-go v0.0.0-20260108163948-af84b247a513
+# github.com/tobiashort/utils-go v0.0.0-20260109155911-bdfcd0d55fc5
 ## explicit; go 1.24.3
 github.com/tobiashort/utils-go/errors
 github.com/tobiashort/utils-go/must
 github.com/tobiashort/utils-go/option
+github.com/tobiashort/utils-go/slices
 github.com/tobiashort/utils-go/strings

@@ -4,6 +4,7 @@ import (
 	"github.com/tobiashort/monkey/ast"
 	"github.com/tobiashort/monkey/token"
 	"github.com/tobiashort/utils-go/errors"
+	"github.com/tobiashort/utils-go/slices"
 )
 
 type Parser struct {
@@ -39,6 +40,10 @@ func (p *Parser) Parse() (ast.Ast, error) {
 			}
 		case token.IF:
 			if err := p.parseIfStatement(); err != nil {
+				return p.ast, err
+			}
+		case token.FUNCTION:
+			if err := p.parseFunction(); err != nil {
 				return p.ast, err
 			}
 		case token.LPAREN, token.INT, token.FLOAT, token.STRING, token.IDENT:
@@ -179,6 +184,75 @@ func (p *Parser) parseIfStatement() error {
 	return nil
 }
 
+func (p *Parser) parseFunction() error {
+	if err := p.expect(token.FUNCTION); err != nil {
+		return err
+	}
+	f := ast.Function{Type: ast.FUNCTION}
+	p.nextToken()
+	if err := p.expect(token.IDENT); err != nil {
+		return err
+	}
+	f.Identifier = p.token()
+	p.nextToken()
+	if params, err := p.parseParameters(); err != nil {
+		return err
+	} else {
+		f.Parameters = params
+	}
+	p.nextToken()
+	if err := p.expect(token.LBRACE); err != nil {
+		return err
+	}
+	if block, err := p.parseBlock(); err != nil {
+		return err
+	} else {
+		f.Block = block
+	}
+	p.ast = append(p.ast, f)
+	return nil
+}
+
+func (p *Parser) parseParameters() ([]ast.Node, error) {
+	if err := p.expect(token.LPAREN); err != nil {
+		return nil, err
+	}
+	startToken := p.token()
+	paramTokens := make([]token.Token, 0)
+	depth := 1
+	for {
+		p.nextToken()
+		if p.token().Type == token.EOF {
+			break
+		} else if p.token().Type == token.RPAREN {
+			depth--
+			if depth == 0 {
+				break
+			} else {
+				paramTokens = append(paramTokens, p.token())
+			}
+		} else if p.token().Type == token.LPAREN {
+			depth++
+			paramTokens = append(paramTokens, p.token())
+		} else {
+			paramTokens = append(paramTokens, p.token())
+		}
+	}
+	if depth != 0 {
+		return nil, errors.WithCtxf("%s:%d:%d: unclosed parameters", startToken.File, startToken.Line, startToken.Column)
+	}
+	paramTokensSplit := slices.Split(paramTokens, func(t token.Token) bool { return t.Type == token.COMMA })
+	params := make([]ast.Node, 0)
+	for _, ts := range paramTokensSplit {
+		if expr, err := New(ts).parseExpression(0); err != nil {
+			return params, err
+		} else {
+			params = append(params, expr)
+		}
+	}
+	return params, nil
+}
+
 func (p *Parser) parseExpressionStatement() error {
 	node, err := p.parseExpression(0)
 	if err != nil {
@@ -224,9 +298,23 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 			return nil, err
 		}
 	case token.IDENT:
-		left = ast.IdentifierExpression{
-			Type:       ast.IDENT,
-			Identifier: p.token(),
+		if p.hasNext() && p.peekToken().Type == token.LPAREN {
+			call := ast.CallExpression{
+				Type:       ast.CALL,
+				Identifier: p.token(),
+			}
+			p.nextToken()
+			if params, err := p.parseParameters(); err != nil {
+				return nil, err
+			} else {
+				call.Parameters = params
+			}
+			left = call
+		} else {
+			left = ast.IdentifierExpression{
+				Type:       ast.IDENT,
+				Identifier: p.token(),
+			}
 		}
 	case token.STRING, token.FLOAT, token.INT:
 		left = ast.LiteralExpression{
@@ -237,7 +325,7 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 		return nil, errors.WithCtxf("%s:%d:%d: illegal token type %q", p.token().File, p.token().Line, p.token().Column, p.token().Type)
 	}
 
-	for {
+	for p.hasNext() {
 		nextBindingPower, err := token.BindingPower(p.peekToken())
 		if err != nil {
 			return nil, err
@@ -272,6 +360,10 @@ func (p *Parser) expect(tokenType token.TokenType) error {
 
 func (p *Parser) token() token.Token {
 	return p.tokens[p.position]
+}
+
+func (p *Parser) hasNext() bool {
+	return p.position < len(p.tokens)-1
 }
 
 func (p *Parser) peekToken() token.Token {

@@ -5,15 +5,17 @@ import "github.com/tobiashort/monkey/token"
 type NodeType = string
 
 const (
-	LET     = "LET"
-	RETURN  = "RETURN"
-	EXPR    = "EXPR"
-	UNARY   = "UNARY"
-	BINARY  = "BINARY"
-	IDENT   = "IDENT"
-	LITERAL = "LITERAL"
-	IF      = "IF"
-	BLOCK   = "BLOCK"
+	LET      = "LET"
+	RETURN   = "RETURN"
+	EXPR     = "EXPR"
+	UNARY    = "UNARY"
+	BINARY   = "BINARY"
+	IDENT    = "IDENT"
+	LITERAL  = "LITERAL"
+	IF       = "IF"
+	BLOCK    = "BLOCK"
+	FUNCTION = "FUNCTION"
+	CALL     = "CALL"
 )
 
 type Node any
@@ -22,6 +24,13 @@ type Ast []Node
 type Block struct {
 	Type NodeType
 	Ast  Ast
+}
+
+type Function struct {
+	Type       NodeType
+	Identifier token.Token
+	Parameters []Node
+	Block      Node
 }
 
 type IfStatement struct {
@@ -68,4 +77,10 @@ type IdentifierExpression struct {
 type LiteralExpression struct {
 	Type    NodeType
 	Literal token.Token
+}
+
+type CallExpression struct {
+	Type       NodeType
+	Identifier token.Token
+	Parameters []Node
 }

@@ -592,3 +592,106 @@ func TestParse10(t *testing.T) {
 
 	test(t, input, expectedAst)
 }
+
+func TestParse11(t *testing.T) {
+	input := strings.Dedent(`fn f(a, b, c) {
+							| return f(a, b, c);
+		                    |}`)
+
+	expectedAst := ast.Ast{
+		ast.Function{
+			Type: ast.FUNCTION,
+			Identifier: token.Token{
+				Type:    token.IDENT,
+				Literal: "f",
+				File:    "",
+				Line:    1,
+				Column:  4,
+			},
+			Parameters: []ast.Node{
+				ast.IdentifierExpression{
+					Type: ast.IDENT,
+					Identifier: token.Token{
+						Type:    token.IDENT,
+						Literal: "a",
+						File:    "",
+						Line:    1,
+						Column:  6,
+					},
+				},
+				ast.IdentifierExpression{
+					Type: ast.IDENT,
+					Identifier: token.Token{
+						Type:    token.IDENT,
+						Literal: "b",
+						File:    "",
+						Line:    1,
+						Column:  9,
+					},
+				},
+				ast.IdentifierExpression{
+					Type: ast.IDENT,
+					Identifier: token.Token{
+						Type:    token.IDENT,
+						Literal: "c",
+						File:    "",
+						Line:    1,
+						Column:  12,
+					},
+				},
+			},
+			Block: ast.Block{
+				Type: ast.BLOCK,
+				Ast: ast.Ast{
+					ast.ReturnStatement{
+						Type: ast.RETURN,
+						Expression: ast.CallExpression{
+							Type: ast.CALL,
+							Identifier: token.Token{
+								Type:    token.IDENT,
+								Literal: "f",
+								File:    "",
+								Line:    2,
+								Column:  9,
+							},
+							Parameters: []ast.Node{
+								ast.IdentifierExpression{
+									Type: ast.IDENT,
+									Identifier: token.Token{
+										Type:    token.IDENT,
+										Literal: "a",
+										File:    "",
+										Line:    2,
+										Column:  11,
+									},
+								},
+								ast.IdentifierExpression{
+									Type: ast.IDENT,
+									Identifier: token.Token{
+										Type:    token.IDENT,
+										Literal: "b",
+										File:    "",
+										Line:    2,
+										Column:  14,
+									},
+								},
+								ast.IdentifierExpression{
+									Type: ast.IDENT,
+									Identifier: token.Token{
+										Type:    token.IDENT,
+										Literal: "c",
+										File:    "",
+										Line:    2,
+										Column:  17,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	test(t, input, expectedAst)
+}
