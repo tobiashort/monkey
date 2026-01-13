@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/tobiashort/monkey/lexer"
 	"github.com/tobiashort/monkey/parser"
@@ -29,10 +30,7 @@ func Start(w io.Writer, r io.Reader) {
 		tokens, err := l.Analyze()
 		if err != nil {
 			fmt.Fprintf(w, "%v\n", err)
-		} else {
-			for _, t := range tokens {
-				fmt.Fprintf(w, "%+v\n", t)
-			}
+			os.Exit(1)
 		}
 
 		p := parser.New(tokens)
