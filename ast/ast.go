@@ -6,6 +6,7 @@ type NodeType = string
 
 const (
 	LET      = "LET"
+	YIELD    = "YIELD"
 	RETURN   = "RETURN"
 	EXPR     = "EXPR"
 	UNARY    = "UNARY"
@@ -13,6 +14,7 @@ const (
 	IDENT    = "IDENT"
 	LITERAL  = "LITERAL"
 	IF       = "IF"
+	IFEXPR   = "IFEXPR"
 	BLOCK    = "BLOCK"
 	FUNCTION = "FUNCTION"
 	CALL     = "CALL"
@@ -51,6 +53,11 @@ type ReturnStatement struct {
 	Expression Node
 }
 
+type YieldStatement struct {
+	Type       NodeType
+	Expression Node
+}
+
 type ExpressionStatement struct {
 	Type       NodeType
 	Expression Node
@@ -83,4 +90,11 @@ type CallExpression struct {
 	Type       NodeType
 	Identifier token.Token
 	Parameters []Node
+}
+
+type IfExpression struct {
+	Type        NodeType
+	Condition   Node
+	Consequence Node
+	Alternative Node
 }

@@ -695,3 +695,98 @@ func TestParse11(t *testing.T) {
 
 	test(t, input, expectedAst)
 }
+
+func TestParse12(t *testing.T) {
+	input := strings.Dedent(`let a = if (x > 0) { yield b; } else { yield c; };`)
+
+	expectedAst := ast.Ast{
+		ast.LetStatement{
+			Type: ast.LET,
+			Identifier: token.Token{
+				Type:    token.IDENT,
+				Literal: "a",
+				File:    "",
+				Line:    1,
+				Column:  5,
+			},
+			Expression: ast.IfExpression{
+				Type: ast.IFEXPR,
+				Condition: ast.BinaryExpression{
+					Type: ast.BINARY,
+					Left: ast.IdentifierExpression{
+						Type: ast.IDENT,
+						Identifier: token.Token{
+							Type:    ast.IDENT,
+							Literal: "x",
+							File:    "",
+							Line:    1,
+							Column:  13,
+						},
+					},
+					Operator: token.Token{
+						Type:    token.GT,
+						Literal: ">",
+						File:    "",
+						Line:    1,
+						Column:  15,
+					},
+					Right: ast.LiteralExpression{
+						Type: ast.LITERAL,
+						Literal: token.Token{
+							Type:    token.INT,
+							Literal: "0",
+							File:    "",
+							Line:    1,
+							Column:  17,
+						},
+					},
+				},
+				Consequence: ast.Block{
+					Type: ast.BLOCK,
+					Ast: ast.Ast{
+						ast.YieldStatement{
+							Type: ast.YIELD,
+							Expression: ast.IdentifierExpression{
+								Type: ast.IDENT,
+								Identifier: token.Token{
+									Type:    token.IDENT,
+									Literal: "b",
+									File:    "",
+									Line:    1,
+									Column:  28,
+								},
+							},
+						},
+					},
+				},
+				Alternative: ast.Block{
+					Type: ast.BLOCK,
+					Ast: ast.Ast{
+						ast.YieldStatement{
+							Type: ast.YIELD,
+							Expression: ast.IdentifierExpression{
+								Type: ast.IDENT,
+								Identifier: token.Token{
+									Type:    token.IDENT,
+									Literal: "c",
+									File:    "",
+									Line:    1,
+									Column:  46,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	test(t, input, expectedAst)
+}
+
+func TestParse13(t *testing.T) {
+	input := strings.Dedent(`let add = fn(a, b){ return a + b; };`)
+
+	expectedAst := ast.Ast{}
+	test(t, input, expectedAst)
+}

@@ -38,6 +38,10 @@ func (p *Parser) Parse() (ast.Ast, error) {
 			if err := p.parseReturnStatement(); err != nil {
 				return p.ast, err
 			}
+		case token.YIELD:
+			if err := p.parseYieldStatement(); err != nil {
+				return p.ast, err
+			}
 		case token.IF:
 			if err := p.parseIfStatement(); err != nil {
 				return p.ast, err
@@ -53,6 +57,7 @@ func (p *Parser) Parse() (ast.Ast, error) {
 		default:
 			return p.ast, errors.WithCtxf("%s:%d:%d: illegal token type %q", p.token().File, p.token().Line, p.token().Column, p.token().Type)
 		}
+		p.nextToken()
 	}
 	return p.ast, nil
 }
@@ -95,12 +100,10 @@ func (p *Parser) parseBlock() (ast.Node, error) {
 	if err != nil {
 		return nast, err
 	}
-	block := ast.Block{
+	return ast.Block{
 		Type: ast.BLOCK,
 		Ast:  nast,
-	}
-	p.nextToken()
-	return block, nil
+	}, nil
 }
 
 func (p *Parser) parseLetStatement() error {
@@ -128,7 +131,6 @@ func (p *Parser) parseLetStatement() error {
 	if err := p.expect(token.SEMICOLON); err != nil {
 		return err
 	}
-	p.nextToken()
 	return nil
 }
 
@@ -149,7 +151,26 @@ func (p *Parser) parseReturnStatement() error {
 	if err := p.expect(token.SEMICOLON); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (p *Parser) parseYieldStatement() error {
+	if err := p.expect(token.YIELD); err != nil {
+		return err
+	}
 	p.nextToken()
+	if expr, err := p.parseExpression(0); err != nil {
+		return err
+	} else {
+		p.ast = append(p.ast, ast.YieldStatement{
+			Type:       ast.YIELD,
+			Expression: expr,
+		})
+	}
+	p.nextToken()
+	if err := p.expect(token.SEMICOLON); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -157,31 +178,63 @@ func (p *Parser) parseIfStatement() error {
 	if err := p.expect(token.IF); err != nil {
 		return err
 	}
-	expr := ast.IfStatement{
+	stmt := ast.IfStatement{
 		Type: ast.IF,
 	}
 	p.nextToken()
 	if cond, err := p.parseExpression(0); err != nil {
 		return err
 	} else {
-		expr.Condition = cond
+		stmt.Condition = cond
 		p.nextToken()
 	}
 	if cons, err := p.parseBlock(); err != nil {
 		return err
 	} else {
-		expr.Consequence = cons
+		stmt.Consequence = cons
 	}
-	if p.token().Type == token.ELSE {
+	if p.hasNext() && p.peekToken().Type == token.ELSE {
+		p.nextToken()
 		p.nextToken()
 		if alt, err := p.parseBlock(); err != nil {
 			return err
 		} else {
+			stmt.Alternative = alt
+		}
+	}
+	p.ast = append(p.ast, stmt)
+	return nil
+}
+
+func (p *Parser) parseIfExpr() (ast.Node, error) {
+	if err := p.expect(token.IF); err != nil {
+		return nil, err
+	}
+	expr := ast.IfExpression{
+		Type: ast.IFEXPR,
+	}
+	p.nextToken()
+	if cond, err := p.parseExpression(0); err != nil {
+		return nil, err
+	} else {
+		expr.Condition = cond
+		p.nextToken()
+	}
+	if cons, err := p.parseBlock(); err != nil {
+		return nil, err
+	} else {
+		expr.Consequence = cons
+	}
+	if p.hasNext() && p.peekToken().Type == token.ELSE {
+		p.nextToken()
+		p.nextToken()
+		if alt, err := p.parseBlock(); err != nil {
+			return nil, err
+		} else {
 			expr.Alternative = alt
 		}
 	}
-	p.ast = append(p.ast, expr)
-	return nil
+	return expr, nil
 }
 
 func (p *Parser) parseFunction() error {
@@ -262,7 +315,6 @@ func (p *Parser) parseExpressionStatement() error {
 	if err := p.expect(token.SEMICOLON); err != nil {
 		return err
 	}
-	p.nextToken()
 	node = ast.ExpressionStatement{
 		Type:       ast.EXPR,
 		Expression: node,
@@ -315,6 +367,12 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 				Type:       ast.IDENT,
 				Identifier: p.token(),
 			}
+		}
+	case token.IF:
+		if expr, err := p.parseIfExpr(); err != nil {
+			return nil, err
+		} else {
+			left = expr
 		}
 	case token.STRING, token.FLOAT, token.INT:
 		left = ast.LiteralExpression{

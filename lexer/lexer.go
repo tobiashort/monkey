@@ -400,6 +400,16 @@ func (l *Lexer) nextToken() token.Token {
 			})
 			l.position += len(f)
 			l.column += len(f)
+		case "yield":
+			tok = option.Some(token.Token{
+				Type:    token.YIELD,
+				Literal: f,
+				File:    l.file,
+				Line:    l.line,
+				Column:  l.column,
+			})
+			l.position += len(f)
+			l.column += len(f)
 		default:
 			if f != "" {
 				tok = option.Some(token.Token{
@@ -460,7 +470,7 @@ func (l *Lexer) nextToken() token.Token {
 }
 
 func (l *Lexer) rune() rune {
-	if l.position >= len(l.input) {
+	if l.position >= len([]rune(l.input)) {
 		return 0
 	}
 	return []rune(l.input)[l.position]

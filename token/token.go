@@ -56,6 +56,7 @@ const (
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
+	YIELD    = "YIELD"
 )
 
 func BindingPower(t Token) (int, error) {
