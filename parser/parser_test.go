@@ -787,6 +787,80 @@ func TestParse12(t *testing.T) {
 func TestParse13(t *testing.T) {
 	input := strings.Dedent(`let add = fn(a, b){ return a + b; };`)
 
-	expectedAst := ast.Ast{}
+	expectedAst := ast.Ast{
+		ast.LetStatement{
+			Type: ast.LET,
+			Identifier: token.Token{
+				Type:    token.IDENT,
+				Literal: "add",
+				File:    "",
+				Line:    1,
+				Column:  5,
+			},
+			Expression: ast.FunctionExpression{
+				Type: ast.FNEXPR,
+				Parameters: []ast.Node{
+					ast.IdentifierExpression{
+						Type: ast.IDENT,
+						Identifier: token.Token{
+							Type:    token.IDENT,
+							Literal: "a",
+							File:    "",
+							Line:    1,
+							Column:  14,
+						},
+					},
+					ast.IdentifierExpression{
+						Type: ast.IDENT,
+						Identifier: token.Token{
+							Type:    token.IDENT,
+							Literal: "b",
+							File:    "",
+							Line:    1,
+							Column:  17,
+						},
+					},
+				},
+				Block: ast.Block{
+					Type: ast.BLOCK,
+					Ast: ast.Ast{
+						ast.ReturnStatement{
+							Type: ast.RETURN,
+							Expression: ast.BinaryExpression{
+								Type: ast.BINARY,
+								Left: ast.IdentifierExpression{
+									Type: ast.IDENT,
+									Identifier: token.Token{
+										Type:    token.IDENT,
+										Literal: "a",
+										File:    "",
+										Line:    1,
+										Column:  28,
+									},
+								},
+								Operator: token.Token{
+									Type:    token.PLUS,
+									Literal: "+",
+									File:    "",
+									Line:    1,
+									Column:  30,
+								},
+								Right: ast.IdentifierExpression{
+									Type: ast.IDENT,
+									Identifier: token.Token{
+										Type:    token.IDENT,
+										Literal: "b",
+										File:    "",
+										Line:    1,
+										Column:  32,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 	test(t, input, expectedAst)
 }

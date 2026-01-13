@@ -206,37 +206,6 @@ func (p *Parser) parseIfStatement() error {
 	return nil
 }
 
-func (p *Parser) parseIfExpr() (ast.Node, error) {
-	if err := p.expect(token.IF); err != nil {
-		return nil, err
-	}
-	expr := ast.IfExpression{
-		Type: ast.IFEXPR,
-	}
-	p.nextToken()
-	if cond, err := p.parseExpression(0); err != nil {
-		return nil, err
-	} else {
-		expr.Condition = cond
-		p.nextToken()
-	}
-	if cons, err := p.parseBlock(); err != nil {
-		return nil, err
-	} else {
-		expr.Consequence = cons
-	}
-	if p.hasNext() && p.peekToken().Type == token.ELSE {
-		p.nextToken()
-		p.nextToken()
-		if alt, err := p.parseBlock(); err != nil {
-			return nil, err
-		} else {
-			expr.Alternative = alt
-		}
-	}
-	return expr, nil
-}
-
 func (p *Parser) parseFunction() error {
 	if err := p.expect(token.FUNCTION); err != nil {
 		return err
@@ -374,6 +343,12 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 		} else {
 			left = expr
 		}
+	case token.FUNCTION:
+		if expr, err := p.parseFunctionExpr(); err != nil {
+			return nil, err
+		} else {
+			left = expr
+		}
 	case token.STRING, token.FLOAT, token.INT:
 		left = ast.LiteralExpression{
 			Type:    ast.LITERAL,
@@ -406,6 +381,62 @@ func (p *Parser) parseExpression(bindingPower int) (ast.Node, error) {
 	}
 
 	return left, nil
+}
+
+func (p *Parser) parseIfExpr() (ast.Node, error) {
+	if err := p.expect(token.IF); err != nil {
+		return nil, err
+	}
+	expr := ast.IfExpression{
+		Type: ast.IFEXPR,
+	}
+	p.nextToken()
+	if cond, err := p.parseExpression(0); err != nil {
+		return nil, err
+	} else {
+		expr.Condition = cond
+		p.nextToken()
+	}
+	if cons, err := p.parseBlock(); err != nil {
+		return nil, err
+	} else {
+		expr.Consequence = cons
+	}
+	if p.hasNext() && p.peekToken().Type == token.ELSE {
+		p.nextToken()
+		p.nextToken()
+		if alt, err := p.parseBlock(); err != nil {
+			return nil, err
+		} else {
+			expr.Alternative = alt
+		}
+	}
+	return expr, nil
+}
+
+func (p *Parser) parseFunctionExpr() (ast.Node, error) {
+	if err := p.expect(token.FUNCTION); err != nil {
+		return nil, err
+	}
+	f := ast.FunctionExpression{
+		Type: ast.FNEXPR,
+	}
+	p.nextToken()
+	if params, err := p.parseParameters(); err != nil {
+		return nil, err
+	} else {
+		f.Parameters = params
+	}
+	p.nextToken()
+	if err := p.expect(token.LBRACE); err != nil {
+		return nil, err
+	}
+	if block, err := p.parseBlock(); err != nil {
+		return nil, err
+	} else {
+		f.Block = block
+	}
+	return f, nil
 }
 
 func (p *Parser) expect(tokenType token.TokenType) error {

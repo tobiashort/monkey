@@ -17,6 +17,7 @@ const (
 	IFEXPR   = "IFEXPR"
 	BLOCK    = "BLOCK"
 	FUNCTION = "FUNCTION"
+	FNEXPR   = "FNEXPR"
 	CALL     = "CALL"
 )
 
@@ -97,4 +98,10 @@ type IfExpression struct {
 	Condition   Node
 	Consequence Node
 	Alternative Node
+}
+
+type FunctionExpression struct {
+	Type       NodeType
+	Parameters []Node
+	Block      Node
 }
